@@ -87,6 +87,8 @@ struct Config {
     bool hierarchicalDocumentSymbolSupport = true;
     // TextDocumentClientCapabilities.completion.completionItem.snippetSupport
     bool snippetSupport = true;
+    // TextDocumentClientCapabilities.definition.linkSupport
+    bool linkSupport = true;
   } client;
 
   struct CodeLens {

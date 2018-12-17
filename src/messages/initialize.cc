@@ -173,6 +173,11 @@ struct TextDocumentClientCap {
     } completionItem;
   } completion;
 
+  // Ignore declaration, implementation, typeDefinition
+  struct LinkSupport {
+    bool linkSupport = false;
+  } definition;
+
   struct DocumentSymbol {
     bool hierarchicalDocumentSymbolSupport = false;
   } documentSymbol;
@@ -183,7 +188,8 @@ REFLECT_STRUCT(TextDocumentClientCap::Completion::CompletionItem,
 REFLECT_STRUCT(TextDocumentClientCap::Completion, completionItem);
 REFLECT_STRUCT(TextDocumentClientCap::DocumentSymbol,
                hierarchicalDocumentSymbolSupport);
-REFLECT_STRUCT(TextDocumentClientCap, completion, documentSymbol);
+REFLECT_STRUCT(TextDocumentClientCap::LinkSupport, linkSupport);
+REFLECT_STRUCT(TextDocumentClientCap, completion, definition, documentSymbol);
 
 struct ClientCap {
   WorkspaceClientCap workspace;
@@ -286,6 +292,8 @@ void Initialize(MessageHandler *m, InitializeParam &param, ReplyOnce &reply) {
   const auto &capabilities = param.capabilities;
   g_config->client.snippetSupport &=
       capabilities.textDocument.completion.completionItem.snippetSupport;
+  g_config->client.linkSupport &=
+      capabilities.textDocument.definition.linkSupport;
   g_config->client.hierarchicalDocumentSymbolSupport &=
       capabilities.textDocument.documentSymbol
           .hierarchicalDocumentSymbolSupport;
