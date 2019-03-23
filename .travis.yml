@@ -1,0 +1,70 @@
+language: cpp
+
+matrix:
+  include:
+
+    # Linux gcc
+    - compiler: gcc
+      dist: xenial
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-8', 'libboost-all-dev']
+      env:
+        - CXX=g++-8
+      before_install:
+        - export CXX=/usr/bin/g++-8
+
+    # Linux clang
+    - compiler: clang
+      dist: xenial
+      before_install:
+        - sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main"
+        - sudo apt-get update -qq
+      install:
+        - sudo apt-get install libboost-all-dev
+        - sudo apt-get install --allow-unauthenticated -qq clang++-8
+        - export CXX="clang++"
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test', 'libboost-all-dev']
+          packages: ['g++-8', 'libboost-all-dev']
+      env:
+        - CXX=clang++-8
+
+    # OSX clang
+    - os: osx
+      osx_image: xcode10
+      env: BUILD_TYPE=Debug CMAKE_GENERATOR="Xcode"
+      compiler: clang
+
+    # OSX gcc
+    - os: osx
+      osx_image: xcode10
+      env: BUILD_TYPE=Debug CMAKE_GENERATOR="Xcode"
+      compiler: gcc
+
+
+
+sudo: required
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update;              fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc;       fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install llvm;       fi
+
+before_script:
+    - uname -a
+    - printenv
+    - which clang++
+    - clang++ --version 2>&1 | grep clang
+    - which g++
+    - g++ --version
+    - $CXX --version
+    - sudo pip install --upgrade pip
+    - sudo pip install --upgrade cmake
+    - cmake --version
+    - sudo cmake --version
+
+script:
+    -  cmake -H. -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -Bbuild -DCMAKE_BUILD_TYPE=Debug
+    -  cmake --build build
